@@ -436,36 +436,94 @@ Window_CraftList.prototype.itemRect = function(index) {
             // Draw description
             this.drawText("Description:", 0, y, this.contents.width);
             y += lineHeight;
-    
             this.drawText(this._recipe.description, 0, y, this.contents.width);
             y += lineHeight + 1;
+    // Draw weapon or armor parameters if applicable
+    var resultItem = this.getItem(this._recipe.result.type, this._recipe.result.id);
+    var paramWidth = this.contents.width / 6;
+    var x =0;
+    
+    if (resultItem && (resultItem.atk !== undefined || resultItem.def !== undefined)) {
+   
+            this.drawText(`Attack: ${resultItem.atk}`, x, y, this.contents.width);
+            x += paramWidth;
+            this.drawText(`  Defense: ${resultItem.def}`, x, y, this.contents.width);
+            x += paramWidth;
+            this.drawText(`    Agility: ${resultItem.agi}`, x, y, this.contents.width);
+            x += paramWidth;
+            
+            y += lineHeight;
+            x=0;
+            this.drawText(`M.Attack: ${resultItem.mat}`, x, y, this.contents.width);
+            x += paramWidth;
+            this.drawText(`  M.Defesnse: ${resultItem.mdf}`, x, y, this.contents.width);
+            x += paramWidth;
+
+
+            this.drawText(`    Luck: ${resultItem.luk}`, x, y, this.contents.width);
+            x += paramWidth;
+
+        y += lineHeight;
+
+        // Add more parameters as needed
+    }
+            // Draw cost if applicable
             if (this._recipe.cost > 0) {
                 this.drawText(`Cost: ${this._recipe.cost} Fairy Mass`, 0, y, this.contents.width);
                 y += lineHeight;
             }
+           
             // Draw materials
             this.drawText("Materials:", 0, y, this.contents.width);
             y += lineHeight;
             this._recipe.materials.forEach(function(material, i) {
                 var materialItem = this.getItemName(material.type, material.id);
                 var iconIndex = this.getItemIconIndex(material.type, material.id);
-                
-                // Draw icon for the material
                 this.drawIcon(iconIndex, 0, y);
-                
-                // Draw material name and quantity
                 this.drawText(`  Material ${i + 1}: ${materialItem} x${material.quantity}`, 24, y, this.contents.width - 24);
                 y += lineHeight;
             }, this);
-           
-            // Draw requirement
-            if (this._recipe.requirement) {
-                var reqItemName = this.getItemName(this._recipe.requirement.type, this._recipe.requirement.id);
-                this.drawText(`Required Item: ${reqItemName}`, 0, y, this.contents.width);
-                y += lineHeight;
-            }
+            
+            
+            
         }
     };
+    Window_CraftDetails.prototype.getItem = function(type, id) {
+        let item = null;
+    
+        if (type === 'Item') {
+            item = $dataItems[id];
+            // Return only basic information for regular items
+            return {
+                name: item.name,
+                description: item.description,
+                iconIndex: item.iconIndex
+            };
+        } else if (type === 'Weapon') {
+            item = $dataWeapons[id];
+        } else if (type === 'Armor') {
+            item = $dataArmors[id];
+        }
+    
+        // Ensure item exists for weapons and armors and return their parameters
+        if (item) {
+            return {
+                name: item.name,
+                description: item.description,
+                iconIndex: item.iconIndex,
+                atk: item.params[2] || 0, // Attack
+                def: item.params[3] || 0, // Defense
+                mat: item.params[4] || 0, // Magic Attack
+                mdf: item.params[5] || 0, // Magic Defense
+                agi: item.params[6] || 0, // Agility
+                luk: item.params[7] || 0  // Luck
+                // Add more parameters as needed based on RPG Maker MV's item structure
+            };
+        }
+    
+        return null;
+    };
+    
     
 
 

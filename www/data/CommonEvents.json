@@ -1,7 +1,7 @@
 [
 null,
-{"id":1,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0},
-{"id":2,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0},
+{"id":1,"list":[{"code":351,"indent":0,"parameters":[]},{"code":0,"indent":0,"parameters":[]}],"name":"Open craft","switchId":1,"trigger":0},
+{"id":2,"list":[{"code":111,"indent":0,"parameters":[4,3,0]},{"code":101,"indent":1,"parameters":["main-kid",5,0,2]},{"code":401,"indent":1,"parameters":["With my life, I shall recreate the impossible feat; "]},{"code":401,"indent":1,"parameters":["may this arrow marks the gave for you."]},{"code":0,"indent":1,"parameters":[]},{"code":412,"indent":0,"parameters":[]},{"code":111,"indent":0,"parameters":[4,4,0]},{"code":101,"indent":1,"parameters":["Actor3",6,0,2]},{"code":401,"indent":1,"parameters":["Now bear witness to the grand casting, the wrath of the ancients!"]},{"code":0,"indent":1,"parameters":[]},{"code":412,"indent":0,"parameters":[]},{"code":111,"indent":0,"parameters":[4,5,0]},{"code":101,"indent":1,"parameters":["main-kid",3,0,2]},{"code":401,"indent":1,"parameters":["By my curse, I am the warrior, the Dragon Slayer, "]},{"code":401,"indent":1,"parameters":["and now I'am the Dragon I shall one day became!"]},{"code":0,"indent":1,"parameters":[]},{"code":412,"indent":0,"parameters":[]},{"code":0,"indent":0,"parameters":[]}],"name":"大招","switchId":1,"trigger":0},
 {"id":3,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0},
 {"id":4,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0}
 ]
