@@ -1,7 +1,7 @@
 [
 null,
 {"id":1,"expanded":true,"name":"家","order":1,"parentId":0,"scrollX":1786.909090909091,"scrollY":977.4545454545455},
-{"id":2,"expanded":true,"name":"出生点","order":2,"parentId":1,"scrollX":2053.090909090909,"scrollY":960},
+{"id":2,"expanded":true,"name":"出生点","order":2,"parentId":1,"scrollX":2070.5454545454545,"scrollY":960},
 {"id":3,"expanded":true,"name":"小红帽家","order":4,"parentId":4,"scrollX":1769.4545454545455,"scrollY":1075.6363636363637},
 {"id":4,"expanded":true,"name":"丛林深处","order":3,"parentId":2,"scrollX":1786.909090909091,"scrollY":960},
 {"id":5,"expanded":true,"name":"test area","order":5,"parentId":2,"scrollX":1786.909090909091,"scrollY":977.4545454545455},
