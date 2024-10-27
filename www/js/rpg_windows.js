@@ -2217,15 +2217,25 @@ Window_SkillList.prototype.costWidth = function() {
     return this.textWidth('000');
 };
 
-Window_SkillList.prototype.drawSkillCost = function(skill, x, y, width) {
-    if (this._actor.skillTpCost(skill) > 0) {
-        this.changeTextColor(this.tpCostColor());
-        this.drawText(this._actor.skillTpCost(skill), x, y, width, 'right');
-    } else if (this._actor.skillMpCost(skill) > 0) {
+Window_BattleSkill.prototype.drawSkillCost = function(skill, x, y, width) {
+    var mpCost = this._actor.skillMpCost(skill);
+    var tpCost = this._actor.skillTpCost(skill);
+    
+    if (mpCost > 0 && tpCost > 0) {
         this.changeTextColor(this.mpCostColor());
-        this.drawText(this._actor.skillMpCost(skill), x, y, width, 'right');
+        this.drawText(mpCost + ' MP', x, y, width, 'right');
+        this.changeTextColor(this.tpCostColor());
+        this.drawText(tpCost + ' TP', x - 80, y, width, 'right');  
+    } else if (mpCost > 0) {
+        this.changeTextColor(this.mpCostColor());
+        this.drawText(mpCost + ' MP', x, y, width, 'right');
+    } else if (tpCost > 0) {
+        this.changeTextColor(this.tpCostColor());
+        this.drawText(tpCost + ' TP', x, y, width, 'right');
     }
 };
+
+
 
 Window_SkillList.prototype.updateHelp = function() {
     this.setHelpWindowItem(this.item());

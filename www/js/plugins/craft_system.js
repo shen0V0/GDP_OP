@@ -31,6 +31,7 @@
 *Cost:50
 </recipe>
  */(function() {
+    window.Scene_Craft = Scene_Craft;
     var parameters = PluginManager.parameters('CraftingSystem');
     var craftMenuName = String(parameters['Craft Menu Name'] || 'Craft');
 
@@ -61,7 +62,7 @@
     };
     
     Scene_Craft.prototype.createCraftWindow = function() {
-        var craftWindowHeight = Graphics.boxHeight - this._helpWindow.height - 340;  // Reserve space for details window
+        var craftWindowHeight = Graphics.boxHeight - this._helpWindow.height - 350;  // Reserve space for details window
         this._craftWindow = new Window_CraftList(0, this._helpWindow.height, Graphics.boxWidth, craftWindowHeight);
         this._craftWindow.setHandler('ok', this.onCraftOk.bind(this));
         this._craftWindow.setHandler('cancel', this.onCraftCancel.bind(this));
@@ -72,7 +73,7 @@
     };
     
     Scene_Craft.prototype.createDetailsWindow = function() {
-        this._detailsWindow = new Window_CraftDetails(0, Graphics.boxHeight - 340, Graphics.boxWidth, 340);
+        this._detailsWindow = new Window_CraftDetails(0, Graphics.boxHeight - 350, Graphics.boxWidth, 340);
         this.addWindow(this._detailsWindow);
     };
     
@@ -121,8 +122,11 @@
         for (var i = 0; i < recipe.materials.length; i++) {
             var material = recipe.materials[i];
             var item = this.getItem(material.type, material.id);
-            if (!$gameParty.numItems(item) >= material.quantity) {
-                return false;
+            console.log(`Checking material: ${material.type} ID: ${material.id} Quantity: ${material.quantity}`);
+            console.log(`Available: ${$gameParty.numItems(item)}`);
+            // Check if the player has enough of the material
+            if ($gameParty.numItems(item) < material.quantity) {
+                return false; // Not enough material
             }
         }
     
@@ -138,6 +142,7 @@
         }
         return true;
     };
+    
     
     
     Scene_Craft.prototype.doCraft = function(recipe) {

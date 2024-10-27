@@ -1850,16 +1850,20 @@ Game_Interpreter.prototype.command122 = function() {
 Game_Interpreter.prototype.command355 = function() {
   var script = this.currentCommand().parameters[0] + '\n';
   while (this.nextEventCode() === 655) {
-    this._index++;
-    script += this.currentCommand().parameters[0] + '\n';
+      this._index++;
+      script += this.currentCommand().parameters[0] + '\n';
   }
   try {
-    eval(script);
+      // Ensure that the script is valid or safe before eval
+      if (this._params[0] && typeof script === 'string') {
+          eval(script);
+      }
   } catch (e) {
-    Yanfly.Util.displayError(e, script, 'SCRIPT CALL ERROR');
+      Yanfly.Util.displayError(e, script, 'SCRIPT CALL ERROR');
   }
   return true;
 };
+
 
 Yanfly.Core.Game_Interpreter_pluginCommand =
     Game_Interpreter.prototype.pluginCommand;
@@ -2582,16 +2586,31 @@ Window_SkillStatus.prototype.refresh = function() {
 };
 
 Window_SkillList.prototype.drawSkillCost = function(skill, x, y, width) {
-    if (this._actor.skillTpCost(skill) > 0) {
-        this.changeTextColor(this.tpCostColor());
-        var skillcost = Yanfly.Util.toGroup(this._actor.skillTpCost(skill));
-        this.drawText(skillcost, x, y, width, 'right');
-    } else if (this._actor.skillMpCost(skill) > 0) {
-        this.changeTextColor(this.mpCostColor());
-        var skillcost = Yanfly.Util.toGroup(this._actor.skillMpCost(skill));
-        this.drawText(skillcost, x, y, width, 'right');
-    }
+  var mpCost = this._actor.skillMpCost(skill);
+  var tpCost = this._actor.skillTpCost(skill);
+
+  if (mpCost > 0 && tpCost > 0) {
+      // Both MP and TP costs are greater than 0
+      this.changeTextColor(this.tpCostColor());
+      var tpCostFormatted = Yanfly.Util.toGroup(tpCost);
+      this.drawText(tpCostFormatted + ' TP',x, y, width, 'right');
+
+      this.changeTextColor(this.mpCostColor());
+      var mpCostFormatted = Yanfly.Util.toGroup(mpCost);
+      this.drawText(mpCostFormatted + ' MP',  x - 100, y, width, 'right');  // Adjust x as needed
+  } else if (tpCost > 0) {
+      // Only TP cost
+      this.changeTextColor(this.tpCostColor());
+      var tpCostFormatted = Yanfly.Util.toGroup(tpCost);
+      this.drawText(tpCostFormatted + ' TP', x, y, width, 'right');
+  } else if (mpCost > 0) {
+      // Only MP cost
+      this.changeTextColor(this.mpCostColor());
+      var mpCostFormatted = Yanfly.Util.toGroup(mpCost);
+      this.drawText(mpCostFormatted + ' MP', x, y, width, 'right');
+  }
 };
+
 
 //=============================================================================
 // Window_EquipStatus
