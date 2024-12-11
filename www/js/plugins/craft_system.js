@@ -1,6 +1,6 @@
 /*:
  * @plugindesc A crafting system for RPG Maker MV that reads crafting recipes from the note fields of items, weapons, and armor.
- * @author ChatGPT
+ * @author Yikai Liu
  *
  * @param Craft Menu Name
  * @desc The name of the crafting menu item.
@@ -63,14 +63,14 @@
     };
     
     Scene_Craft.prototype.createCraftWindow = function() {
-        var craftWindowHeight = Graphics.boxHeight - this._helpWindow.height - 350;  // Reserve space for details window
+        var craftWindowHeight = Graphics.boxHeight - this._helpWindow.height - 350;  
         this._craftWindow = new Window_CraftList(0, this._helpWindow.height, Graphics.boxWidth, craftWindowHeight);
         this._craftWindow.setHandler('ok', this.onCraftOk.bind(this));
         this._craftWindow.setHandler('cancel', this.onCraftCancel.bind(this));
         this._craftWindow.setHandler('select', this.onCraftSelect.bind(this));
         this.addWindow(this._craftWindow);
-        this._craftWindow.activate();  // Ensure the window is active for input
-        this._craftWindow.select(0);  // Select the first item by default
+        this._craftWindow.activate();   
+        this._craftWindow.select(0);   
     };
     
     Scene_Craft.prototype.createDetailsWindow = function() {
@@ -82,7 +82,7 @@
   
     var selectedItem = this._craftWindow.item();
     if (selectedItem && this._detailsWindow) {
-        this._detailsWindow.setRecipe(selectedItem);  // Pass selected recipe to details window
+        this._detailsWindow.setRecipe(selectedItem);   
     }
 };
 
@@ -123,18 +123,18 @@ Scene_Craft.prototype.onCraftOk = function() {
     var recipe = this._craftWindow.item();
     if (recipe && this.canCraft(recipe)) {
         this.doCraft(recipe);
-        this.showNotification(`Crafted successfully!`); // Show item name in success message
-        this._craftWindow.refresh(); // Refresh the crafting list
+        this.showNotification(`Crafted successfully!`);  
+        this._craftWindow.refresh();  
     } else {
         this.showNotification(this.getFailureReason(recipe));
-        SoundManager.playBuzzer(); // Play failure sound
+        SoundManager.playBuzzer();  
     }
-    this._craftWindow.activate(); // Re-activate the window
+    this._craftWindow.activate();  
 };
 
     
     Scene_Craft.prototype.onCraftCancel = function() {
-        this.popScene();  // Exit the scene
+        this.popScene();   
     };
     
     Scene_Craft.prototype.getItem = function(type, id) {
@@ -208,48 +208,46 @@ Scene_Craft.prototype.onCraftOk = function() {
 
     Window_CraftList.prototype.initialize = function(x, y, width, height) {
         Window_Selectable.prototype.initialize.call(this, x, y, width, height);
-        this._rowHeight = this.lineHeight(); // Height of each row
+        this._rowHeight = this.lineHeight(); 
         this._itemsPerRow = 3;
         this._data = [];
         this.refresh();
     };
     
     Window_CraftList.prototype.select = function(index) {
-        Window_Selectable.prototype.select.call(this, index);  // Call parent method to handle selection
+        Window_Selectable.prototype.select.call(this, index);   
         if (this._handlers['select']) {
-            this.callHandler('select');  // Trigger the 'select' handler when selection changes
+            this.callHandler('select');   
         }
     };
     Window_CraftList.prototype.maxRows = function() {
-        return Math.ceil(this.maxItems() / this.maxCols()); // Calculate rows based on the number of items and columns
+        return Math.ceil(this.maxItems() / this.maxCols());  
     };
     
     Window_CraftList.prototype.maxCols = function() {
-        return this._itemsPerRow;  // Define the number of items per row (3 in your case)
+        return this._itemsPerRow;  
     };
     
     
     Window_CraftList.prototype.update = function() {
         Window_Selectable.prototype.update.call(this);
     
-        // Ensure correct scrolling when the cursor moves to new rows
+       
         if (this.index() !== this._lastIndex) {
             this._lastIndex = this.index();
             this.ensureCursorVisible();
-            this.callUpdateSelect();  // Custom method to call the 'select' handler
+            this.callUpdateSelect();   
         }
     };
     Window_CraftList.prototype.ensureCursorVisible = function() {
-        // Make sure the selected item is within the visible window
+       
         var row = Math.floor(this.index() / this.maxCols());
         var visibleRows = this.numVisibleRows();
     
-        // Scroll up if the cursor is above the visible window
-        if (row < this.topRow()) {
+         if (row < this.topRow()) {
             this.setTopRow(row);
         }
-        // Scroll down if the cursor is below the visible window
-        if (row > this.bottomRow() - 1) {
+         if (row > this.bottomRow() - 1) {
             this.setBottomRow(row + 1);
         }
     };
@@ -283,7 +281,7 @@ Scene_Craft.prototype.onCraftOk = function() {
     
     Window_CraftList.prototype.callUpdateSelect = function() {
         if (this._handlers['select']) {
-            this.callHandler('select');  // Call the select handler
+            this.callHandler('select');   
         }
     };
     
@@ -301,7 +299,7 @@ Scene_Craft.prototype.onCraftOk = function() {
         this.drawAllItems();
     };
     Window_CraftList.prototype.createContents = function() {
-        this.contents = new Bitmap(this.contentsWidth(), this.contentsHeight()); // Ensure proper bitmap size
+        this.contents = new Bitmap(this.contentsWidth(), this.contentsHeight());  
     };
     
     Window_CraftList.prototype.contentsHeight = function() {
@@ -360,9 +358,9 @@ Scene_Craft.prototype.onCraftOk = function() {
                     { type: match[3], id: Number(match[4]), quantity: Number(match[5]) },
                     { type: match[6], id: Number(match[7]), quantity: Number(match[8]) }
                 ],
-                description: match[9] || "",  // Handle missing description
-                requirement: match[10] ? { type: match[10], id: Number(match[11]) } : null, // Handle optional requirement
-                cost: match[12] ? Number(match[12]) : 0 // Handle optional cost
+                description: match[9] || "",  
+                requirement: match[10] ? { type: match[10], id: Number(match[11]) } : null,  
+                cost: match[12] ? Number(match[12]) : 0  
             };
             recipes.push(recipe);
         }
@@ -372,18 +370,18 @@ Scene_Craft.prototype.onCraftOk = function() {
     
 
     Window_CraftList.prototype.drawAllItems = function() {
-        var topIndex = this.topIndex(); // Get the first visible item index
-        var bottomIndex = Math.min(this.maxItems(), topIndex + this.numVisibleRows() * this.maxCols()); // Get the last visible item index
+        var topIndex = this.topIndex(); 
+        var bottomIndex = Math.min(this.maxItems(), topIndex + this.numVisibleRows() * this.maxCols()); 
     
         for (var i = topIndex; i < bottomIndex; i++) {
-            this.drawItem(i); // Only draw visible items
+            this.drawItem(i);  
         }
     };
     
     
    Window_CraftList.prototype.drawItem = function(index) {
     var rect = this.itemRect(index);
-    if (rect.y + rect.height > 0 && rect.y < this.height) { // Ensure items are drawn only when within the visible area
+    if (rect.y + rect.height > 0 && rect.y < this.height) {  
         var recipe = this._data[index];
         if (recipe) {
             var iconIndex = this.getItemIconIndex(recipe.result.type, recipe.result.id);
@@ -407,34 +405,33 @@ Window_CraftList.prototype.cursorUp = function(wrap) {
     }
 };
 Window_CraftList.prototype.itemHeight = function() {
-    // Set the height of each item in the list (the row height)
+    
     return this.lineHeight();
 };
 Window_CraftList.prototype.cursorPagedown = function() {
     this.smoothScrollBy(this.maxPageRows());
 };
 Window_CraftList.prototype.maxPageRows = function() {
-    // Define how many rows can be displayed per page for pagination
+     
     return this.numVisibleRows();
 };
 Window_CraftList.prototype.cursorPageup = function() {
     this.smoothScrollBy(-this.maxPageRows());
 };
 Window_CraftList.prototype.numVisibleRows = function() {
-    // Calculate how many rows can be visible based on the window's height and row height
-    return Math.floor(this.height / this.itemHeight());
+     return Math.floor(this.height / this.itemHeight());
 };
     
    
 Window_CraftList.prototype.itemRect = function(index) {
     var rect = new Rectangle();
-    var row = Math.floor(index / this.maxCols()); // Calculate row based on index
-    var col = index % this.maxCols(); // Calculate column based on index
+    var row = Math.floor(index / this.maxCols());  
+    var col = index % this.maxCols();  
 
-    rect.x = col * (this.contentsWidth() / this.maxCols()); // X position
-    rect.y = row * this.itemHeight() - this._scrollY; // Y position with scroll offset
-    rect.width = this.contentsWidth() / this.maxCols(); // Width for each item
-    rect.height = this.itemHeight(); // Height for each item
+    rect.x = col * (this.contentsWidth() / this.maxCols());  
+    rect.y = row * this.itemHeight() - this._scrollY;  
+    rect.width = this.contentsWidth() / this.maxCols();  
+    rect.height = this.itemHeight();  
 
     return rect;
 };
@@ -442,7 +439,7 @@ Window_CraftList.prototype.itemRect = function(index) {
 
     Window_CraftList.prototype.getItemIconIndex = function(type, id) {
         var item = SceneManager._scene.getItem(type, id);
-        return item ? item.iconIndex : 0;  // Default to icon index 0 if item is not found
+        return item ? item.iconIndex : 0;   
     };
 
     Window_CraftList.prototype.getItemName = function(type, id) {
@@ -459,13 +456,13 @@ Window_CraftList.prototype.itemRect = function(index) {
 
     Window_CraftNotification.prototype.initialize = function(x, y, width, height) {
         Window_Base.prototype.initialize.call(this, x, y, width, height);
-        this.openness = 0; // Start hidden
+        this.openness = 0; 
         this._message = '';
     };
     Window_CraftNotification.prototype.setMessage = function(message) {
         this._message = message;
         this.refresh();
-        this.open(); // Open the window to show the message
+        this.open();  
     };
 
     Window_CraftNotification.prototype.refresh = function() {
@@ -477,7 +474,7 @@ Window_CraftList.prototype.itemRect = function(index) {
         const width = Graphics.boxWidth / 2;
         const height = this._helpWindow.fittingHeight(1);
         const x = (Graphics.boxWidth - width) / 2;
-        const y = this._craftWindow.y - height - 10; // Above the crafting list
+        const y = this._craftWindow.y - height - 10;  
         this._notificationWindow = new Window_CraftNotification(x, y, width, height);
         this.addWindow(this._notificationWindow);
     };
@@ -485,35 +482,30 @@ Window_CraftList.prototype.itemRect = function(index) {
     Scene_Craft.prototype.showNotification = function(message) {
         if (this._notificationWindow) {
             this._notificationWindow.setMessage(message);
-            setTimeout(() => this._notificationWindow.close(), 2000); // Auto-close after 2 seconds
+            setTimeout(() => this._notificationWindow.close(), 2000);  
         }
     };
     function showNotification(message) {
-        // Create a temporary window for the notification
-        const width = Graphics.boxWidth / 2; // Half the screen width
-        const height = 100; // Fixed height
-        const x = (Graphics.boxWidth - width) / 2; // Center horizontally
-        const y = Graphics.boxHeight / 4; // Quarter down the screen
+         
+        const width = Graphics.boxWidth / 2;  
+        const height = 100; 
+        const x = (Graphics.boxWidth - width) / 2;  
+        const y = Graphics.boxHeight / 4;  
         const notificationWindow = new Window_Base(new Rectangle(x, y, width, height));
     
-        // Add the message to the window
-        notificationWindow.drawText(message, 0, 0, width, "center");
+         notificationWindow.drawText(message, 0, 0, width, "center");
         SceneManager._scene.addChild(notificationWindow);
     
-        // Wait for any key press to dismiss the window
-        const listener = function () {
-            // Remove the window and key listener
-            SceneManager._scene.removeChild(notificationWindow);
+         const listener = function () {
+             SceneManager._scene.removeChild(notificationWindow);
             Input.clear();
             document.removeEventListener("keydown", listener);
         };
     
-        // Add the key listener
-        document.addEventListener("keydown", listener);
+         document.addEventListener("keydown", listener);
     }
     
-    // Define the window for displaying recipe details
-    function Window_CraftDetails() {
+     function Window_CraftDetails() {
         this.initialize.apply(this, arguments);
     }
 
@@ -538,13 +530,11 @@ Window_CraftList.prototype.itemRect = function(index) {
             var y = 0;
             var lineHeight = this.lineHeight();
             
-            // Draw description
-            this.drawText("Description:", 0, y, this.contents.width);
+             this.drawText("Description:", 0, y, this.contents.width);
             y += lineHeight;
             this.drawText(this._recipe.description, 0, y, this.contents.width);
             y += lineHeight + 1;
-    // Draw weapon or armor parameters if applicable
-    var resultItem = this.getItem(this._recipe.result.type, this._recipe.result.id);
+     var resultItem = this.getItem(this._recipe.result.type, this._recipe.result.id);
     var paramWidth = this.contents.width / 6;
     var x =0;
     
@@ -570,7 +560,7 @@ Window_CraftList.prototype.itemRect = function(index) {
 
         y += lineHeight;
 
-        // Add more parameters as needed
+        
     }
             // Draw cost if applicable
             if (this._recipe.cost > 0) {
@@ -598,7 +588,7 @@ Window_CraftList.prototype.itemRect = function(index) {
     
         if (type === 'Item') {
             item = $dataItems[id];
-            // Return only basic information for regular items
+             
             return {
                 name: item.name,
                 description: item.description,
@@ -610,8 +600,7 @@ Window_CraftList.prototype.itemRect = function(index) {
             item = $dataArmors[id];
         }
     
-        // Ensure item exists for weapons and armors and return their parameters
-        if (item) {
+         if (item) {
             return {
                 name: item.name,
                 description: item.description,
@@ -622,7 +611,7 @@ Window_CraftList.prototype.itemRect = function(index) {
                 mdf: item.params[5] || 0, // Magic Defense
                 agi: item.params[6] || 0, // Agility
                 luk: item.params[7] || 0  // Luck
-                // Add more parameters as needed based on RPG Maker MV's item structure
+                
             };
         }
     
@@ -634,7 +623,7 @@ Window_CraftList.prototype.itemRect = function(index) {
 
     Window_CraftDetails.prototype.getItemIconIndex = function(type, id) {
         var item = SceneManager._scene.getItem(type, id);
-        return item ? item.iconIndex : 0;  // Default to icon index 0 if item is not found
+        return item ? item.iconIndex : 0;   
     };
 
     Window_CraftDetails.prototype.getItemName = function(type, id) {
