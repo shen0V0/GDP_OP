@@ -1721,7 +1721,7 @@ Game_Action.prototype.elementsMaxRate = function(target, elements) {
 };
 
 Game_Action.prototype.applyCritical = function(damage) {
-    return damage * 3;
+    return damage * 1.75;
 };
 
 Game_Action.prototype.applyVariance = function(damage, variance) {
@@ -2857,6 +2857,40 @@ Game_Battler.prototype.constructor = Game_Battler;
 Game_Battler.prototype.initialize = function() {
     Game_BattlerBase.prototype.initialize.call(this);
 };
+Game_Battler.prototype.rotate = function(value) {
+    // Handle Sprite_Battler for animated SV characters
+    const sprite = SceneManager._scene._spriteset._battleField.children.find(
+        child => child._battler === this
+    );
+
+    if (sprite) {
+
+        sprite.rotation = value * Math.PI / 180; // Rotate SV character
+    } else {
+
+    }
+
+    // Handle Static Battlers (usually in _enemySprites)
+    const staticSprite = SceneManager._scene._spriteset._enemySprites.find(
+        child => child._battler === this
+    );
+
+    if (staticSprite) {
+
+        staticSprite.rotation = value * Math.PI / 180; // Rotate static battler image
+    } else {
+
+    }
+};
+
+    
+    Game_Battler.prototype.setAnchor = function(new_x, new_y){
+    
+    this.battler()._mainSprite.anchor.x = new_x;
+    
+    this.battler()._mainSprite.anchor.y = new_y;
+    
+    };
 
 Game_Battler.prototype.initMembers = function() {
     Game_BattlerBase.prototype.initMembers.call(this);

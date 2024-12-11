@@ -59,6 +59,7 @@
         this.createHelpWindow();
         this.createCraftWindow();
         this.createDetailsWindow();
+        this.createNotificationWindow();
     };
     
     Scene_Craft.prototype.createCraftWindow = function() {
@@ -85,18 +86,52 @@
     }
 };
 
+Scene_Craft.prototype.getFailureReason = function(recipe) {
+    if (!recipe) {
+        return 'Invalid recipe.';
+    }
+    if (!recipe.materials) {
+        return 'Missing materials.';
+    }
 
-    
-    Scene_Craft.prototype.onCraftOk = function() {
-        var recipe = this._craftWindow.item();
-        if (recipe && this.canCraft(recipe)) {
-            this.doCraft(recipe);
-            this._craftWindow.refresh();  // Refresh the window to reflect changes
-        } else {
-            SoundManager.playBuzzer();
+    // Check materials
+    for (var i = 0; i < recipe.materials.length; i++) {
+        var material = recipe.materials[i];
+        var item = this.getItem(material.type, material.id);
+        if ($gameParty.numItems(item) < material.quantity) {
+            return `Not enough ${item.name}.`;
         }
-        this._craftWindow.activate();  // Re-activate the window for further input
-    };
+    }
+
+    // Check requirement
+    if (recipe.requirement) {
+        var requiredItem = this.getItem(recipe.requirement.type, recipe.requirement.id);
+        if (!$gameParty.hasItem(requiredItem)) {
+            return `Requires ${requiredItem.name}.`;
+        }
+    }
+
+    // Check cost
+    if (recipe.cost > 0 && $gameParty.gold() < recipe.cost) {
+        return 'Not enough gold.';
+    }
+
+    return 'Cannot craft this item.';
+};
+    
+Scene_Craft.prototype.onCraftOk = function() {
+    var recipe = this._craftWindow.item();
+    if (recipe && this.canCraft(recipe)) {
+        this.doCraft(recipe);
+        this.showNotification(`Crafted successfully!`); // Show item name in success message
+        this._craftWindow.refresh(); // Refresh the crafting list
+    } else {
+        this.showNotification(this.getFailureReason(recipe));
+        SoundManager.playBuzzer(); // Play failure sound
+    }
+    this._craftWindow.activate(); // Re-activate the window
+};
+
     
     Scene_Craft.prototype.onCraftCancel = function() {
         this.popScene();  // Exit the scene
@@ -279,14 +314,17 @@
         var recipes = [];
         $dataItems.concat($dataWeapons, $dataArmors).forEach(function(item) {
             if (item && item.note) {
-                var recipe = this.parseRecipe(item.note);
-                if (recipe && this.canDisplayRecipe(recipe)) {
-                    recipes.push(recipe);
-                }
+                var itemRecipes = this.parseRecipes(item.note);
+                itemRecipes.forEach(function(recipe) {
+                    if (this.canDisplayRecipe(recipe)) {
+                        recipes.push(recipe);
+                    }
+                }, this);
             }
         }, this);
         return recipes;
     };
+    
     Window_CraftList.prototype.canDisplayRecipe = function(recipe) {
         if (recipe.requirement) {
             var requiredItem = this.getItemById(recipe.requirement.type, recipe.requirement.id);
@@ -310,14 +348,13 @@
         return null;
     };
     
-
-    Window_CraftList.prototype.parseRecipe = function(note) {
-        var recipe = null;
-        var regex = /<recipe>\s*Result:\s*(Item|Weapon|Armor)\s*(\d+)\s*[\s\S]*?Material1:\s*(Item|Weapon|Armor)\s*(\d+),\s*(\d+)\s*[\s\S]*?Material2:\s*(Item|Weapon|Armor)\s*(\d+),\s*(\d+)\s*[\s\S]*?Description:\s*(.*?)\s*(?:Requirement:\s*(Item|Weapon|Armor)\s*(\d+))?\s*(?:Cost:\s*(\d+))?\s*<\/recipe>/i;
-        var match = regex.exec(note);
-    
-        if (match) {
-            recipe = {
+    Window_CraftList.prototype.parseRecipes = function(note) {
+        var recipes = [];
+        var regex = /<recipe>\s*Result:\s*(Item|Weapon|Armor)\s*(\d+)\s*[\s\S]*?Material1:\s*(Item|Weapon|Armor)\s*(\d+),\s*(\d+)\s*[\s\S]*?Material2:\s*(Item|Weapon|Armor)\s*(\d+),\s*(\d+)\s*[\s\S]*?Description:\s*(.*?)\s*(?:Requirement:\s*(Item|Weapon|Armor)\s*(\d+))?\s*(?:Cost:\s*(\d+))?\s*<\/recipe>/ig;
+        var match;
+        
+        while ((match = regex.exec(note)) !== null) {
+            var recipe = {
                 result: { type: match[1], id: Number(match[2]) },
                 materials: [
                     { type: match[3], id: Number(match[4]), quantity: Number(match[5]) },
@@ -327,9 +364,10 @@
                 requirement: match[10] ? { type: match[10], id: Number(match[11]) } : null, // Handle optional requirement
                 cost: match[12] ? Number(match[12]) : 0 // Handle optional cost
             };
+            recipes.push(recipe);
         }
     
-        return recipe;
+        return recipes;
     };
     
 
@@ -412,6 +450,68 @@ Window_CraftList.prototype.itemRect = function(index) {
         return item ? item.name : "Unknown Item";
     };
 
+    function Window_CraftNotification() {
+        this.initialize.apply(this, arguments);
+    }
+
+    Window_CraftNotification.prototype = Object.create(Window_Base.prototype);
+    Window_CraftNotification.prototype.constructor = Window_CraftNotification;
+
+    Window_CraftNotification.prototype.initialize = function(x, y, width, height) {
+        Window_Base.prototype.initialize.call(this, x, y, width, height);
+        this.openness = 0; // Start hidden
+        this._message = '';
+    };
+    Window_CraftNotification.prototype.setMessage = function(message) {
+        this._message = message;
+        this.refresh();
+        this.open(); // Open the window to show the message
+    };
+
+    Window_CraftNotification.prototype.refresh = function() {
+        this.contents.clear();
+        this.drawText(this._message, 0, 0, this.contentsWidth(), 'center');
+    };
+
+    Scene_Craft.prototype.createNotificationWindow = function() {
+        const width = Graphics.boxWidth / 2;
+        const height = this._helpWindow.fittingHeight(1);
+        const x = (Graphics.boxWidth - width) / 2;
+        const y = this._craftWindow.y - height - 10; // Above the crafting list
+        this._notificationWindow = new Window_CraftNotification(x, y, width, height);
+        this.addWindow(this._notificationWindow);
+    };
+
+    Scene_Craft.prototype.showNotification = function(message) {
+        if (this._notificationWindow) {
+            this._notificationWindow.setMessage(message);
+            setTimeout(() => this._notificationWindow.close(), 2000); // Auto-close after 2 seconds
+        }
+    };
+    function showNotification(message) {
+        // Create a temporary window for the notification
+        const width = Graphics.boxWidth / 2; // Half the screen width
+        const height = 100; // Fixed height
+        const x = (Graphics.boxWidth - width) / 2; // Center horizontally
+        const y = Graphics.boxHeight / 4; // Quarter down the screen
+        const notificationWindow = new Window_Base(new Rectangle(x, y, width, height));
+    
+        // Add the message to the window
+        notificationWindow.drawText(message, 0, 0, width, "center");
+        SceneManager._scene.addChild(notificationWindow);
+    
+        // Wait for any key press to dismiss the window
+        const listener = function () {
+            // Remove the window and key listener
+            SceneManager._scene.removeChild(notificationWindow);
+            Input.clear();
+            document.removeEventListener("keydown", listener);
+        };
+    
+        // Add the key listener
+        document.addEventListener("keydown", listener);
+    }
+    
     // Define the window for displaying recipe details
     function Window_CraftDetails() {
         this.initialize.apply(this, arguments);
